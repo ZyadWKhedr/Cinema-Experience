@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../domain/entities/seat.dart';
-import 'fadding_letter_text.dart';
-import '../pages/ticket_preview.dart';
-import 'wave_button_text.dart';
+import '../../../domain/entities/seat.dart';
+import '../common/fadding_letter_text.dart';
+import '../../pages/ticket_preview.dart';
+import '../common/wave_button_text.dart';
 
 // ─── Seat-selection bottom sheet ─────────────────────────────────────────────
 //

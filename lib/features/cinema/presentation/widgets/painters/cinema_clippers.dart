@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/cinema_constants.dart';
+import '../../../../../../core/constants/cinema_constants.dart';
 
 class IMAXScreenClipper extends CustomClipper<Path> {
   @override

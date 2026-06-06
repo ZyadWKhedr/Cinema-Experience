@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/entities/seat.dart';
-import '../providers/cinema_provider.dart';
+import '../../../domain/entities/seat.dart';
+import '../../providers/cinema_provider.dart';
 
 // ─── Seat geometry (mirrors Swift constants) ──────────────────────────────────
 const double _kSeatW   = 28.0;

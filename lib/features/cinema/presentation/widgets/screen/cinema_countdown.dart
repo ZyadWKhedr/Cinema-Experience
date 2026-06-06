@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'cinema_painters.dart';
+import '../painters/cinema_painters.dart';
 
 class Countdown extends StatefulWidget {
   final int number;

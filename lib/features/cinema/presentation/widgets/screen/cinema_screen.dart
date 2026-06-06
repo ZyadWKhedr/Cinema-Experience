@@ -4,11 +4,11 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
-import '../../../../core/constants/cinema_constants.dart';
-import 'cinema_clippers.dart';
+import '../../../../../core/constants/cinema_constants.dart';
+import '../painters/cinema_clippers.dart';
 import 'cinema_countdown.dart';
 
-// ─────────────────────────────────────────────────────────────
+// ───────────────────────────────────  ──────────────────────────
 // Alpha helper (NO Opacity widget)
 // ─────────────────────────────────────────────────────────────
 ColorFilter _alphaFilter(double a) {
