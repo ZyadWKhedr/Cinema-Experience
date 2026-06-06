@@ -72,4 +72,8 @@ class CinemaController extends Notifier<CinemaState> {
 
     state = state.copyWith(showThankYou: true, isConfirmed: false);
   }
+
+  void resetFlow() {
+  state = CinemaState.initial();
+}
 }
