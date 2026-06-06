@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/seat.dart';
@@ -89,33 +90,60 @@ Widget _buildSeatRow(
             onTap: () => controller.selectSeat(seats[i]),
 
             child: Transform.scale(
-              scale: scale,
+  scale: scale,
 
-              child: Container(
-                width: 28,
-                height: 25,
-                margin: const EdgeInsets.symmetric(horizontal: 3),
+  child: Animate(
+    effects: [
+      ScaleEffect(
+        begin: const Offset(1, 1),
+        end: const Offset(1.15, 1.15),
+        duration: 200.ms,
+        curve: Curves.easeOut,
+      ),
+      FadeEffect(duration: 200.ms),
+    ],
 
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6),
+    target: state.selectedSeatId?.id == seats[i].id ? 1 : 0,
 
-                  color: seats[i].status == SeatStatus.occupied
-    ? Colors.grey
-    : state.selectedSeatId?.id == seats[i].id
-        ? Colors.green
-        : isVipRow
-            ? Colors.orangeAccent //  VIP highlight
-            : Colors.blueGrey,
-                ),
+    child: Container(
+      width: 28,
+      height: 25,
+      margin: const EdgeInsets.symmetric(horizontal: 3),
 
-                child: Center(
-                  child: Text(
-                    seats[i].id,
-                    style: const TextStyle(fontSize: 10, color: Colors.white),
-                  ),
-                ),
-              ),
-            ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(6),
+
+        color: seats[i].status == SeatStatus.occupied
+            ? Colors.grey
+            : state.selectedSeatId?.id == seats[i].id
+                ? Colors.green
+                : isVipRow
+                    ? Colors.orangeAccent
+                    : Colors.blueGrey,
+
+        boxShadow: state.selectedSeatId?.id == seats[i].id
+            ? [
+                BoxShadow(
+                  color: Colors.green.withOpacity(0.6),
+                  blurRadius: 15,
+                  spreadRadius: 2,
+                )
+              ]
+            : [],
+      ),
+
+      child: Center(
+        child: Text(
+          seats[i].id,
+          style: const TextStyle(
+            fontSize: 10,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    ),
+  ),
+),
           ),
         ],
       ],
