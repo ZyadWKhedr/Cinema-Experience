@@ -2,9 +2,11 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../../core/constants/cinema_constants.dart';
+import '../../providers/cinema_screen_provider.dart';
 import '../painters/cinema_clippers.dart';
 import 'cinema_countdown.dart';
 
@@ -35,7 +37,7 @@ final _reflStops = List.generate(51, (i) => i / 50.0);
 // ─────────────────────────────────────────────────────────────
 // Cinema Screen
 // ─────────────────────────────────────────────────────────────
-class CinemaScreen extends StatefulWidget {
+class CinemaScreen extends ConsumerStatefulWidget {
   final double crtProgress;
   final bool isCountdownActive;
   final int countdownNumber;
@@ -50,20 +52,18 @@ class CinemaScreen extends StatefulWidget {
   });
 
   @override
-  State<CinemaScreen> createState() => _CinemaScreenState();
+  ConsumerState<CinemaScreen> createState() => _CinemaScreenState();
 }
 
-class _CinemaScreenState extends State<CinemaScreen> {
+class _CinemaScreenState extends ConsumerState<CinemaScreen> {
   VideoPlayerController? _vc;
   bool _videoReady = false;
-
-  static const _url =
-      'https://www.w3schools.com/html/mov_bbb.mp4';
 
   @override
   void initState() {
     super.initState();
-    _vc = VideoPlayerController.networkUrl(Uri.parse(_url))
+    final url = ref.read(videoUrlProvider);
+    _vc = VideoPlayerController.networkUrl(Uri.parse(url))
       ..initialize().then((_) {
         if (!mounted) return;
         setState(() => _videoReady = true);
