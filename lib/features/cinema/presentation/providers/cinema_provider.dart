@@ -39,4 +39,17 @@ class CinemaController extends Notifier<CinemaState> {
       selectedSeatId: seat,
     );
   }
+
+  Map<String, List<Seat>> getGroupedSeats() {
+  final seats = getSeats();
+
+  final Map<String, List<Seat>> grouped = {};
+
+  for (final seat in seats) {
+    grouped.putIfAbsent(seat.row, () => []);
+    grouped[seat.row]!.add(seat);
+  }
+
+  return grouped;
+}
 }
