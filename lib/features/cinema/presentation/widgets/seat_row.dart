@@ -94,7 +94,7 @@ class _SeatView extends StatelessWidget {
   final bool isSelected;
   final bool isOccupied;
 
-  const _SeatView({super.key, required this.isSelected, required this.isOccupied});
+  const _SeatView({required this.isSelected, required this.isOccupied});
 
   @override
   Widget build(BuildContext context) => SizedBox(
