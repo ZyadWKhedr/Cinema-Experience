@@ -43,6 +43,18 @@ class _FadingLetterTextState extends State<FadingLetterText>
   }
 
   @override
+  void didUpdateWidget(covariant FadingLetterText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.text != widget.text) {
+      for (final ac in _acs) {
+        ac.dispose();
+      }
+      _acs.clear();
+      _build();
+    }
+  }
+
+  @override
   void dispose() {
     for (final ac in _acs) {
       ac.dispose();

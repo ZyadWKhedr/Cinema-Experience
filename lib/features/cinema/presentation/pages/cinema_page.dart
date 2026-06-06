@@ -156,10 +156,7 @@ class _CinemaPageState extends ConsumerState<CinemaPage> {
     );
   }
 
-  Widget _buildOverlay(
-    CinemaState state,
-    CinemaController controller,
-  ) {
+  Widget _buildOverlay(CinemaState state, CinemaController controller) {
     if (state.selectedSeatId == null) {
       return const SizedBox.shrink();
     }
@@ -217,7 +214,9 @@ class SpotlightPainter extends CustomPainter {
     if (rowIndex == -1) return;
 
     final List<Seat> seatsInRow = groupedSeats[selectedSeatId.row]!;
-    final int seatIndex = seatsInRow.indexWhere((s) => s.id == selectedSeatId.id);
+    final int seatIndex = seatsInRow.indexWhere(
+      (s) => s.id == selectedSeatId.id,
+    );
     if (seatIndex == -1) return;
 
     final double rowHeight = 42.0;
@@ -246,25 +245,40 @@ class SpotlightPainter extends CustomPainter {
 
     if (seatY < 0) return;
 
-    final double startY = -(24.0 + 275.0 * (size.width / 729.0));
+    final double startY = -(24.0 + 300.0 * (size.width / 729.0));
 
     final Path path = Path();
-    path.moveTo(size.width / 2 - 25, startY); // screen bottom left, thinner and higher
+    path.moveTo(
+      size.width / 2 - 25,
+      startY,
+    ); // screen bottom left, thinner and higher
     path.lineTo(size.width / 2 + 25, startY); // screen bottom right
-    path.lineTo(seatX + 16 * rowScale, seatY + 12 * rowScale); // seat bottom right, thinner
-    path.lineTo(seatX - 16 * rowScale, seatY + 12 * rowScale); // seat bottom left
+    path.lineTo(
+      seatX + 16 * rowScale,
+      seatY + 12 * rowScale,
+    ); // seat bottom right, thinner
+    path.lineTo(
+      seatX - 16 * rowScale,
+      seatY + 12 * rowScale,
+    ); // seat bottom left
     path.close();
 
     final Paint paint = Paint()
-      ..shader = LinearGradient(
-        colors: [
-          Colors.white.withValues(alpha: 0.15),
-          const Color(0xFFF4C430).withValues(alpha: 0.3),
-          const Color(0xFFF4C430).withValues(alpha: 0.0),
-        ],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-      ).createShader(Rect.fromPoints(Offset(size.width / 2, startY), Offset(seatX, seatY)))
+      ..shader =
+          LinearGradient(
+            colors: [
+              Colors.white.withValues(alpha: 0.15),
+              const Color(0xFFF4C430).withValues(alpha: 0.3),
+              const Color(0xFFF4C430).withValues(alpha: 0.0),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ).createShader(
+            Rect.fromPoints(
+              Offset(size.width / 2, startY),
+              Offset(seatX, seatY),
+            ),
+          )
       ..style = PaintingStyle.fill;
 
     canvas.drawPath(path, paint);
@@ -273,6 +287,6 @@ class SpotlightPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant SpotlightPainter oldDelegate) {
     return oldDelegate.selectedSeatId != selectedSeatId ||
-           oldDelegate.scrollOffset != scrollOffset;
+        oldDelegate.scrollOffset != scrollOffset;
   }
 }

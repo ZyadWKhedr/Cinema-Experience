@@ -10,9 +10,9 @@ class TicketPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        width: MediaQuery.of(context).size.width - 40,
+        width: MediaQuery.of(context).size.width - 20,
         height: 140,
-        margin: const EdgeInsets.symmetric(horizontal: 20),
+        margin: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
           color: const Color(0xFF1E293B),
           borderRadius: BorderRadius.circular(20),
@@ -93,7 +93,10 @@ class TicketPreview extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.green.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
@@ -101,7 +104,11 @@ class TicketPreview extends StatelessWidget {
                       ),
                       child: const Text(
                         'CONFIRMED',
-                        style: TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const Spacer(),
@@ -109,7 +116,20 @@ class TicketPreview extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(12, (index) {
-                        final widths = [2.0, 4.0, 1.0, 3.0, 2.0, 5.0, 1.0, 2.0, 4.0, 1.0, 3.0, 2.0];
+                        final widths = [
+                          2.0,
+                          4.0,
+                          1.0,
+                          3.0,
+                          2.0,
+                          5.0,
+                          1.0,
+                          2.0,
+                          4.0,
+                          1.0,
+                          3.0,
+                          2.0,
+                        ];
                         return Container(
                           width: widths[index],
                           height: 40,
@@ -143,12 +163,20 @@ class TicketPreview extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(color: Colors.white54, fontSize: 9, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: Colors.white54,
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );
