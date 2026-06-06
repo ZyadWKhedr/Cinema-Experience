@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/seat.dart';
 import '../providers/cinema_provider.dart';
 import '../widgets/cinema_screen.dart';
+import '../widgets/ticket_preview.dart';
 
 class CinemaPage extends ConsumerWidget {
   const CinemaPage({super.key});
@@ -28,7 +29,19 @@ class CinemaPage extends ConsumerWidget {
 
             const SizedBox(height: 40),
 
-            Text(state.selectedSeatId?.id ?? 'No Seat Selected'),
+            AnimatedSwitcher(
+  duration: const Duration(milliseconds: 300),
+  child: state.selectedSeatId == null
+      ? const Text(
+          "Select a seat",
+          key: ValueKey("empty"),
+          style: TextStyle(color: Colors.white70),
+        )
+      : TicketPreview(
+          key: ValueKey("ticket"),
+          seat: state.selectedSeatId!,
+        ),
+),
 
             const SizedBox(height: 20),
 
@@ -124,7 +137,7 @@ Widget _buildSeatRow(
         boxShadow: state.selectedSeatId?.id == seats[i].id
             ? [
                 BoxShadow(
-                  color: Colors.green.withOpacity(0.6),
+                  color: Colors.green.withValues(alpha:0.6),
                   blurRadius: 15,
                   spreadRadius: 2,
                 )
