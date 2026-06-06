@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/entities/seat.dart';
 import '../providers/cinema_provider.dart';
 
 class CinemaPage extends ConsumerWidget {
@@ -11,13 +12,19 @@ class CinemaPage extends ConsumerWidget {
 
     final state = ref.watch(cinemaProvider);
 
+    final demoSeat = Seat(
+  row: 'A',
+  number: 5,
+  status: SeatStatus.available,
+);
+
    return Scaffold(
   body: Center(
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          state.selectedSeatId ?? 'No Seat Selected',
+          state.selectedSeatId?.id ?? 'No Seat Selected',
         ),
 
         const SizedBox(height: 20),
@@ -26,7 +33,7 @@ class CinemaPage extends ConsumerWidget {
           onPressed: () {
             ref
                 .read(cinemaProvider.notifier)
-                .selectSeat('A5');
+                .selectSeat(demoSeat);
           },
           child: const Text(
             'Select A5',

@@ -1,9 +1,11 @@
 import 'package:equatable/equatable.dart';
 
+import '../../domain/entities/seat.dart';
+
 class CinemaState extends Equatable {
   final int countdown;
 
-  final String? selectedSeatId;
+  final Seat? selectedSeatId;
 
   final bool isConfirmed;
 
@@ -31,7 +33,7 @@ class CinemaState extends Equatable {
 
   CinemaState copyWith({
     int? countdown,
-    String? selectedSeatId,
+    Seat? selectedSeatId,
     bool? isConfirmed,
     bool? showTicket,
     bool? showThankYou,

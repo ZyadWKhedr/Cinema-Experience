@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/entities/seat.dart';
 import 'cinema_state.dart';
 
 final cinemaProvider =
@@ -13,9 +14,9 @@ class CinemaController extends Notifier<CinemaState> {
     return CinemaState.initial();
   }
 
-  void selectSeat(String seatId) {
+  void selectSeat(Seat seat) {
     state = state.copyWith(
-      selectedSeatId: seatId,
+      selectedSeatId: seat,
     );
   }
 }
