@@ -1,10 +1,121 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/seat.dart';
 import '../providers/cinema_provider.dart';
 
+// ─── Seat geometry (mirrors Swift constants) ──────────────────────────────────
+const double _kSeatW   = 28.0;
+const double _kSeatH   = 25.0;
+const double _kStepX   = 64.0; // horizontal gap between seat centers
+const double _kStepY   = 42.0; // vertical gap between rows
+
+// ─── Gold colours ─────────────────────────────────────────────────────────────
+const _gold1 = Color(0xFFFFD166);
+const _gold2 = Color(0xFFF4C430);
+const _gold3 = Color(0xFFD4AF37);
+const _goldGrad = LinearGradient(
+  colors: [_gold1, _gold2, _gold3],
+  begin: Alignment.centerLeft,
+  end: Alignment.centerRight,
+);
+
+// ─── Seat back shape (mirrors Swift's SeatBackShape) ─────────────────────────
+class _SeatBackPainter extends CustomPainter {
+  final bool isSelected;
+  final bool isOccupied;
+
+  const _SeatBackPainter({required this.isSelected, required this.isOccupied});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width, h = size.height;
+
+    // Back outline (U-shape, open at top)
+    final outlinePath = Path()
+      ..moveTo(0, 0)
+      ..lineTo(0, h - 6)
+      ..quadraticBezierTo(0, h, 6, h)
+      ..lineTo(w - 6, h)
+      ..quadraticBezierTo(w, h, w, h - 6)
+      ..lineTo(w, 0);
+
+    final strokeColor = isOccupied
+        ? const Color(0xFF1E293B)
+        : isSelected
+            ? null // use shader below
+            : const Color(0xFF64748B);
+
+    if (isSelected) {
+      final rect = Rect.fromLTWH(0, 0, w, h);
+      final paint = Paint()
+        ..shader   = _goldGrad.createShader(rect)
+        ..style    = PaintingStyle.stroke
+        ..strokeWidth = 3.5
+        ..strokeCap = StrokeCap.round;
+      canvas.drawPath(outlinePath, paint);
+    } else {
+      canvas.drawPath(
+        outlinePath,
+        Paint()
+          ..color       = strokeColor!
+          ..style       = PaintingStyle.stroke
+          ..strokeWidth = 3.5
+          ..strokeCap   = StrokeCap.round,
+      );
+    }
+
+    // Cushion bar (bottom seat pad)
+    const cushionH = 8.0;
+    final cushionRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(5, h - 10, w - 10, cushionH),
+      const Radius.circular(1.5),
+    );
+
+    if (isSelected) {
+      final paint = Paint()
+        ..shader = _goldGrad.createShader(Rect.fromLTWH(0, 0, w, h));
+      canvas.drawRRect(cushionRect, paint);
+    } else {
+      canvas.drawRRect(
+        cushionRect,
+        Paint()..color = isOccupied ? const Color(0xFF1E293B) : const Color(0xFF64748B),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_SeatBackPainter o) =>
+      o.isSelected != isSelected || o.isOccupied != isOccupied;
+}
+
+// ─── Single seat widget ────────────────────────────────────────────────────────
+class _SeatView extends StatelessWidget {
+  final bool isSelected;
+  final bool isOccupied;
+
+  const _SeatView({super.key, required this.isSelected, required this.isOccupied});
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: _kSeatW, height: _kSeatH,
+    child: CustomPaint(
+      painter: _SeatBackPainter(
+          isSelected: isSelected, isOccupied: isOccupied),
+    ),
+  );
+}
+
+// ─── CinemaSeatRow ────────────────────────────────────────────────────────────
+//
+//  Mirrors Swift's generatePerfectCinemaSeats layout:
+//  • 11 columns per row (9 for first/last rows, corners clipped)
+//  • stepX = 64, stepY = 42
+//  • Perspective: rows converge toward screen — earlier rows are smaller
+//    and shifted upward (matching Swift's y += rowIndex * stepY from a
+//    base of 300).
+//  • Horizontal centering via offset that matches a trapezoid convergence.
+//
 class CinemaSeatRow extends ConsumerWidget {
   final List<Seat> seats;
   final int rowIndex;
@@ -18,100 +129,56 @@ class CinemaSeatRow extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.read(cinemaProvider.notifier);
-    final state = ref.watch(cinemaProvider);
+Widget build(BuildContext context, WidgetRef ref) {
+  final state = ref.watch(cinemaProvider);
+  final controller = ref.read(cinemaProvider.notifier);
 
-    // 🎯 ARC CONFIG
-    const double radius = 280;
-    const double angleStep = 0.35;
+  const double seatSpacing = 32.0;
+  const double rowHeight = 42.0;
 
-    final double centerIndex = (totalRows - 1) / 2;
-    final double angle = (rowIndex - centerIndex) * angleStep;
+  final double rowScale = 1.0 - (rowIndex * 0.015);
 
-    // 🎬 TRUE CIRCLE PROJECTION
-    final double dx = radius * sin(angle);
-    final double dy = radius * (1 - cos(angle));
-
-    // 🎯 depth-based scaling (farther rows = smaller)
-    final double scale = 1.0 - (angle.abs() * 0.25);
-
-    final bool isVipRow = rowIndex == 0;
-
-    return Transform.translate(
-      offset: Offset(dx, dy),
-      child: Transform(
+  return SizedBox(
+    height: rowHeight,
+    width: double.infinity,
+    child: Center(
+      child: Transform.scale(
+        scale: rowScale,
         alignment: Alignment.center,
-        transform: Matrix4.identity()
-          ..setEntry(3, 2, 0.001)
-          ..rotateX(-angle * 0.7),
 
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min, // 🔥 IMPORTANT FIX
+          children: [
+            for (int i = 0; i < seats.length; i++) ...[
+              
+              // aisle gap
+              if (i == seats.length ~/ 2)
+                const SizedBox(width: seatSpacing),
 
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              for (int i = 0; i < seats.length; i++) ...[
-                
-                // 🎟 aisle gap (cinema center walkway)
-                if (i == seats.length ~/ 2)
-                  const SizedBox(width: 32),
+              GestureDetector(
+                onTap: () {
+                  if (seats[i].status != SeatStatus.occupied) {
+                    controller.selectSeat(seats[i]);
+                  }
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
 
-                GestureDetector(
-                  onTap: () => controller.selectSeat(seats[i]),
+                  width: _kSeatW,
+                  height: _kSeatH,
+                  margin: const EdgeInsets.symmetric(horizontal: 2),
 
-                  child: Transform.scale(
-                    scale: scale,
-
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-
-                      width: 26,
-                      height: 26,
-
-                      margin: const EdgeInsets.symmetric(horizontal: 2),
-
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6),
-
-                        color: seats[i].status == SeatStatus.occupied
-                            ? Colors.grey.shade700
-                            : state.selectedSeatId?.id == seats[i].id
-                                ? Colors.greenAccent
-                                : isVipRow
-                                    ? Colors.orangeAccent
-                                    : Colors.blueGrey.shade600,
-
-                        boxShadow: state.selectedSeatId?.id == seats[i].id
-                            ? [
-                                BoxShadow(
-                                  color: Colors.greenAccent.withOpacity(0.6),
-                                  blurRadius: 14,
-                                  spreadRadius: 2,
-                                )
-                              ]
-                            : [],
-                      ),
-
-                      child: Center(
-                        child: Text(
-                          seats[i].id,
-                          style: const TextStyle(
-                            fontSize: 9,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
+                  child: _SeatView(
+                    isSelected: state.selectedSeatId?.id == seats[i].id,
+                    isOccupied: seats[i].status == SeatStatus.occupied,
                   ),
                 ),
-              ],
+              ),
             ],
+          ],
           ),
         ),
       ),
     );
-  }
+}
 }
