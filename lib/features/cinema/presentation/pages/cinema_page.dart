@@ -135,7 +135,7 @@ class _CinemaPageState extends ConsumerState<CinemaPage> {
                                   rowIndex: i,
                                   totalRows: rows.length,
                                 ),
-                              const SizedBox(height: 250), // Increased padding so ticket sheet doesn't cover seats
+                              const SizedBox(height: 250),
                             ],
                           ),
                         ),
@@ -148,7 +148,7 @@ class _CinemaPageState extends ConsumerState<CinemaPage> {
           ),
 
           // ─────────────────────────────────────────────
-          // OVERLAY SHEET (REPLACES bottomSheet)
+          // OVERLAY SHEET
           // ─────────────────────────────────────────────
           _buildOverlay(state, controller),
         ],
@@ -160,7 +160,10 @@ class _CinemaPageState extends ConsumerState<CinemaPage> {
     CinemaState state,
     CinemaController controller,
   ) {
-    if (state.selectedSeatId == null || state.isConfirmed) {
+    if (state.selectedSeatId == null) {
+      return const SizedBox.shrink();
+    }
+    if (state.isConfirmed && !state.showTicket) {
       return const SizedBox.shrink();
     }
 
@@ -243,9 +246,11 @@ class SpotlightPainter extends CustomPainter {
 
     if (seatY < 0) return;
 
+    final double startY = -(24.0 + 275.0 * (size.width / 729.0));
+
     final Path path = Path();
-    path.moveTo(size.width / 2 - 25, -24); // screen bottom left, thinner and higher
-    path.lineTo(size.width / 2 + 25, -24); // screen bottom right
+    path.moveTo(size.width / 2 - 25, startY); // screen bottom left, thinner and higher
+    path.lineTo(size.width / 2 + 25, startY); // screen bottom right
     path.lineTo(seatX + 16 * rowScale, seatY + 12 * rowScale); // seat bottom right, thinner
     path.lineTo(seatX - 16 * rowScale, seatY + 12 * rowScale); // seat bottom left
     path.close();
@@ -259,7 +264,7 @@ class SpotlightPainter extends CustomPainter {
         ],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-      ).createShader(Rect.fromPoints(Offset(size.width / 2, -24), Offset(seatX, seatY)))
+      ).createShader(Rect.fromPoints(Offset(size.width / 2, startY), Offset(seatX, seatY)))
       ..style = PaintingStyle.fill;
 
     canvas.drawPath(path, paint);
