@@ -2,6 +2,9 @@
 
 A premium, highly interactive Flutter application demonstrating a cutting-edge UI/UX for booking cinema tickets. This project showcases advanced custom painting, complex animations, state management, and clean architecture to deliver a "wow" factor directly out of the box.
 
+
+https://github.com/user-attachments/assets/4c473ab9-f49b-4162-a911-2eba82c6792c
+
 ## ✨ Features
 
 - **3D Perspective IMAX Screen:** A dynamically curved cinema screen built using custom clippers, rendering a real video trailer with a floor reflection.
