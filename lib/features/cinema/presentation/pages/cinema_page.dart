@@ -30,20 +30,44 @@ class CinemaPage extends ConsumerWidget {
             const SizedBox(height: 40),
 
             AnimatedSwitcher(
-  duration: const Duration(milliseconds: 300),
-  child: state.selectedSeatId == null
-      ? const Text(
-          "Select a seat",
-          key: ValueKey("empty"),
-          style: TextStyle(color: Colors.white70),
-        )
-      : TicketPreview(
-          key: ValueKey("ticket"),
-          seat: state.selectedSeatId!,
-        ),
-),
+              duration: const Duration(milliseconds: 300),
+              child: state.selectedSeatId == null
+                  ? const Text(
+                      "Select a seat",
+                      key: ValueKey("empty"),
+                      style: TextStyle(color: Colors.white70),
+                    )
+                  : TicketPreview(
+                      key: ValueKey("ticket"),
+                      seat: state.selectedSeatId!,
+                    ),
+            ),
 
             const SizedBox(height: 20),
+
+            if (state.selectedSeatId != null)
+              ElevatedButton(
+                onPressed: state.isConfirmed
+                    ? null
+                    : () {
+                        ref.read(cinemaProvider.notifier).confirmSeat();
+                      },
+                child: Text(
+                  state.isConfirmed ? "Confirming..." : "Confirm Seat",
+                ),
+              ),
+            if (state.isConfirmed)
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: Text(
+                  "Confirming in ${state.countdown}...",
+                  style: const TextStyle(
+                    color: Colors.orangeAccent,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
 
             Expanded(
               child: Column(
@@ -87,10 +111,10 @@ Widget _buildSeatRow(
   final double scale = 1 - (rowIndex * 0.08);
 
   return Transform.translate(
-  offset: Offset(
-    (totalRows / 2 - rowIndex) * 2.5, // centered curve
-    0,
-  ), //  creates curve illusion
+    offset: Offset(
+      (totalRows / 2 - rowIndex) * 2.5, // centered curve
+      0,
+    ), //  creates curve illusion
 
     child: Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -103,60 +127,57 @@ Widget _buildSeatRow(
             onTap: () => controller.selectSeat(seats[i]),
 
             child: Transform.scale(
-  scale: scale,
+              scale: scale,
 
-  child: Animate(
-    effects: [
-      ScaleEffect(
-        begin: const Offset(1, 1),
-        end: const Offset(1.15, 1.15),
-        duration: 200.ms,
-        curve: Curves.easeOut,
-      ),
-      FadeEffect(duration: 200.ms),
-    ],
+              child: Animate(
+                effects: [
+                  ScaleEffect(
+                    begin: const Offset(1, 1),
+                    end: const Offset(1.15, 1.15),
+                    duration: 200.ms,
+                    curve: Curves.easeOut,
+                  ),
+                  FadeEffect(duration: 200.ms),
+                ],
 
-    target: state.selectedSeatId?.id == seats[i].id ? 1 : 0,
+                target: state.selectedSeatId?.id == seats[i].id ? 1 : 0,
 
-    child: Container(
-      width: 28,
-      height: 25,
-      margin: const EdgeInsets.symmetric(horizontal: 3),
+                child: Container(
+                  width: 28,
+                  height: 25,
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
 
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(6),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
 
-        color: seats[i].status == SeatStatus.occupied
-            ? Colors.grey
-            : state.selectedSeatId?.id == seats[i].id
-                ? Colors.green
-                : isVipRow
-                    ? Colors.orangeAccent
-                    : Colors.blueGrey,
+                    color: seats[i].status == SeatStatus.occupied
+                        ? Colors.grey
+                        : state.selectedSeatId?.id == seats[i].id
+                        ? Colors.green
+                        : isVipRow
+                        ? Colors.orangeAccent
+                        : Colors.blueGrey,
 
-        boxShadow: state.selectedSeatId?.id == seats[i].id
-            ? [
-                BoxShadow(
-                  color: Colors.green.withValues(alpha:0.6),
-                  blurRadius: 15,
-                  spreadRadius: 2,
-                )
-              ]
-            : [],
-      ),
+                    boxShadow: state.selectedSeatId?.id == seats[i].id
+                        ? [
+                            BoxShadow(
+                              color: Colors.green.withValues(alpha: 0.6),
+                              blurRadius: 15,
+                              spreadRadius: 2,
+                            ),
+                          ]
+                        : [],
+                  ),
 
-      child: Center(
-        child: Text(
-          seats[i].id,
-          style: const TextStyle(
-            fontSize: 10,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    ),
-  ),
-),
+                  child: Center(
+                    child: Text(
+                      seats[i].id,
+                      style: const TextStyle(fontSize: 10, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ],

@@ -3,8 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/seat.dart';
 import 'cinema_state.dart';
 
-final cinemaProvider =
-    NotifierProvider<CinemaController, CinemaState>(
+final cinemaProvider = NotifierProvider<CinemaController, CinemaState>(
   CinemaController.new,
 );
 
@@ -33,23 +32,44 @@ class CinemaController extends Notifier<CinemaState> {
   }
 
   void selectSeat(Seat seat) {
-    if (seat.status == SeatStatus.occupied) return;
+  if (seat.status == SeatStatus.occupied) return;
+  if (state.isConfirmed) return;
 
-    state = state.copyWith(
-      selectedSeatId: seat,
-    );
-  }
+  state = state.copyWith(
+    selectedSeatId: seat,
+  );
+}
 
   Map<String, List<Seat>> getGroupedSeats() {
-  final seats = getSeats();
+    final seats = getSeats();
 
-  final Map<String, List<Seat>> grouped = {};
+    final Map<String, List<Seat>> grouped = {};
 
-  for (final seat in seats) {
-    grouped.putIfAbsent(seat.row, () => []);
-    grouped[seat.row]!.add(seat);
+    for (final seat in seats) {
+      grouped.putIfAbsent(seat.row, () => []);
+      grouped[seat.row]!.add(seat);
+    }
+
+    return grouped;
   }
 
-  return grouped;
-}
+  void confirmSeat() {
+    final seat = state.selectedSeatId;
+
+    if (seat == null) return;
+
+    state = state.copyWith(isConfirmed: true, countdown: 3);
+
+    _startCountdown();
+  }
+
+  void _startCountdown() async {
+    for (int i = 3; i >= 0; i--) {
+      await Future.delayed(const Duration(seconds: 1));
+
+      state = state.copyWith(countdown: i);
+    }
+
+    state = state.copyWith(showThankYou: true, isConfirmed: false);
+  }
 }
