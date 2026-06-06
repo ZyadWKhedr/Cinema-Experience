@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,72 +22,85 @@ class CinemaSeatRow extends ConsumerWidget {
     final controller = ref.read(cinemaProvider.notifier);
     final state = ref.watch(cinemaProvider);
 
-    final isVipRow = rowIndex == 0;
+    // 🎯 ARC CONFIG
+    const double radius = 280;
+    const double angleStep = 0.35;
 
-    // 🔥 controlled scaling (no UI break)
-    final double scale = 1.0 - (rowIndex * 0.03);
+    final double centerIndex = (totalRows - 1) / 2;
+    final double angle = (rowIndex - centerIndex) * angleStep;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+    // 🎬 TRUE CIRCLE PROJECTION
+    final double dx = radius * sin(angle);
+    final double dy = radius * (1 - cos(angle));
 
-      child: Transform.translate(
-        offset: Offset(
-          (totalRows / 2 - rowIndex) * 6,
-          0,
-        ),
+    // 🎯 depth-based scaling (farther rows = smaller)
+    final double scale = 1.0 - (angle.abs() * 0.25);
+
+    final bool isVipRow = rowIndex == 0;
+
+    return Transform.translate(
+      offset: Offset(dx, dy),
+      child: Transform(
+        alignment: Alignment.center,
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, 0.001)
+          ..rotateX(-angle * 0.7),
 
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 6),
+
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               for (int i = 0; i < seats.length; i++) ...[
                 
-                // aisle gap
+                // 🎟 aisle gap (cinema center walkway)
                 if (i == seats.length ~/ 2)
-                  const SizedBox(width: 28),
-          
+                  const SizedBox(width: 32),
+
                 GestureDetector(
                   onTap: () => controller.selectSeat(seats[i]),
-          
+
                   child: Transform.scale(
                     scale: scale,
-          
+
                     child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-          
-                      width: 46,
-                      height: 42,
+                      duration: const Duration(milliseconds: 180),
+
+                      width: 26,
+                      height: 26,
+
                       margin: const EdgeInsets.symmetric(horizontal: 2),
-          
+
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(6),
-          
+
                         color: seats[i].status == SeatStatus.occupied
-                            ? Colors.grey
+                            ? Colors.grey.shade700
                             : state.selectedSeatId?.id == seats[i].id
-                                ? Colors.green
+                                ? Colors.greenAccent
                                 : isVipRow
                                     ? Colors.orangeAccent
-                                    : Colors.blueGrey,
-          
+                                    : Colors.blueGrey.shade600,
+
                         boxShadow: state.selectedSeatId?.id == seats[i].id
                             ? [
                                 BoxShadow(
-                                  color: Colors.green.withValues(alpha:0.5),
-                                  blurRadius: 10,
-                                  spreadRadius: 1,
+                                  color: Colors.greenAccent.withOpacity(0.6),
+                                  blurRadius: 14,
+                                  spreadRadius: 2,
                                 )
                               ]
                             : [],
                       ),
-          
+
                       child: Center(
                         child: Text(
                           seats[i].id,
                           style: const TextStyle(
                             fontSize: 9,
                             color: Colors.white,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
