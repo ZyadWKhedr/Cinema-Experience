@@ -17,44 +17,45 @@ class CinemaPage extends ConsumerWidget {
     final rows = groupedSeats.keys.toList();
 
     return Scaffold(
-  body: Padding(
-    padding: const EdgeInsets.all(20),
-    child: Column(
-      children: [
-        
-        const SizedBox(height: 60),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            const SizedBox(height: 60),
 
-        const CinemaScreen(),
+            const CinemaScreen(),
 
-        const SizedBox(height: 40),
+            const SizedBox(height: 40),
 
-        Text(
-          state.selectedSeatId?.id ?? 'No Seat Selected',
+            Text(state.selectedSeatId?.id ?? 'No Seat Selected'),
+
+            const SizedBox(height: 20),
+
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (
+                    int rowIndex = 0;
+                    rowIndex < rows.length;
+                    rowIndex++
+                  ) ...[
+                    _buildSeatRow(
+                      context,
+                      ref,
+                      groupedSeats[rows[rowIndex]]!,
+                      rowIndex,
+                      rows.length,
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ),
-
-        const SizedBox(height: 20),
-
-       Expanded(
-  child: Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      for (int rowIndex = 0; rowIndex < rows.length; rowIndex++) ...[
-        _buildSeatRow(
-          context,
-          ref,
-          groupedSeats[rows[rowIndex]]!,
-          rowIndex,
-          rows.length,
-        ),
-        const SizedBox(height: 10),
-      ],
-    ],
-  ),
-),
-      ],
-    ),
-  ),
-);
+      ),
+    );
   }
 }
 
@@ -67,22 +68,28 @@ Widget _buildSeatRow(
 ) {
   final controller = ref.read(cinemaProvider.notifier);
   final state = ref.watch(cinemaProvider);
-
+  final isVipRow = rowIndex == 0;
   // closer rows = bigger seats
   final double scale = 1 - (rowIndex * 0.08);
 
   return Transform.translate(
-    offset: Offset(rowIndex * 6.0, 0), //  creates curve illusion
+  offset: Offset(
+    (totalRows / 2 - rowIndex) * 2.5, // centered curve
+    0,
+  ), //  creates curve illusion
 
     child: Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        for (final seat in seats) ...[
+        for (int i = 0; i < seats.length; i++) ...[
+          // 👇 create aisle gap in the middle
+          if (i == seats.length ~/ 2) const SizedBox(width: 30),
+
           GestureDetector(
-            onTap: () => controller.selectSeat(seat),
+            onTap: () => controller.selectSeat(seats[i]),
 
             child: Transform.scale(
-              scale: scale, // 👈 depth effect
+              scale: scale,
 
               child: Container(
                 width: 28,
@@ -92,20 +99,19 @@ Widget _buildSeatRow(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
 
-                  color: seat.status == SeatStatus.occupied
-                      ? Colors.grey
-                      : state.selectedSeatId?.id == seat.id
-                          ? Colors.green
-                          : Colors.blueGrey,
+                  color: seats[i].status == SeatStatus.occupied
+    ? Colors.grey
+    : state.selectedSeatId?.id == seats[i].id
+        ? Colors.green
+        : isVipRow
+            ? Colors.orangeAccent //  VIP highlight
+            : Colors.blueGrey,
                 ),
 
                 child: Center(
                   child: Text(
-                    seat.id,
-                    style: const TextStyle(
-                      fontSize: 10,
-                      color: Colors.white,
-                    ),
+                    seats[i].id,
+                    style: const TextStyle(fontSize: 10, color: Colors.white),
                   ),
                 ),
               ),
